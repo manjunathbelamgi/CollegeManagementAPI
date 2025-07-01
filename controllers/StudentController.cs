@@ -16,13 +16,15 @@ namespace CollegeManagementAPI.Controllers
     public class StudentController : ControllerBase
     {
         private readonly IStudentRepository _repo;
-    private readonly ILogger<StudentController> _logger;
+        private readonly ILogger<StudentController> _logger;
 
-    public StudentController(IStudentRepository repo, ILogger<StudentController> logger)
-    {
-        _repo = repo;
-        _logger = logger;
-    }
+        
+
+        public StudentController(IStudentRepository repo, ILogger<StudentController> logger)
+        {
+            _repo = repo;
+            _logger = logger;
+        }
         [HttpGet]
         [Route("GetStudents")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -30,11 +32,13 @@ namespace CollegeManagementAPI.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult<IEnumerable<StudentDTO>> GetStudents()
         {
+            _logger.LogInformation("The GetStudents method executed");
+
             var stu = _repo.GetStudents().Select(s => new StudentDTO
            {
-               id = s.id,
+                id = s.id,
                 name = s.name,
-               email = s.email
+                email = s.email
 
            });
             return Ok(stu);
@@ -48,7 +52,7 @@ namespace CollegeManagementAPI.Controllers
         public ActionResult<StudentDTO> GetById(int id)
         {
             var stu = _repo.GetById(id);
-            _logger.LogInformation("Staring the GetById method");
+            _logger.LogInformation("The GetById method executed");
             if (stu == null)
             {
                 return BadRequest();
@@ -69,6 +73,8 @@ namespace CollegeManagementAPI.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult<StudentDTO> CreateStudent([FromBody] StudentDTO model)
         {
+            _logger.LogInformation("The CreateStudent method executed");
+
             if (model == null)
             {
                 return BadRequest();
@@ -81,7 +87,7 @@ namespace CollegeManagementAPI.Controllers
             var res = _repo.Create(student);
             model.id = res.id;
            
-            return Ok(model);
+            return Ok(res);
         }
         [HttpPut]
         [Route("update")]
@@ -90,14 +96,18 @@ namespace CollegeManagementAPI.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult<StudentDTO> UpdateStudent([FromBody] StudentDTO model)
         {
-            if (model == null)
+            _logger.LogInformation("The UpdateStudent method executed");
+
+            var updated = new Student { 
+            id = model.id,
+            name = model.name,
+            email = model.email
+            };
+            var res = _repo.Update(updated);
+            if (res == null)
             {
                 return BadRequest();
             }
-            var existing = StudentRepository.students.FirstOrDefault(n => n.id == model.id);
-            existing.id = model.id;
-            existing.name = model.name;
-            existing.email = model.email;
 
             return NoContent();
         }
@@ -133,12 +143,14 @@ namespace CollegeManagementAPI.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult<bool> DeleteStudent(int id)
         {
-            var stu = StudentRepository.students.FirstOrDefault(n => n.id == id);
-            if (stu == null)
+            _logger.LogInformation("The DeleteStudent method executed");
+
+            var res = _repo.DeleteStudent(id);
+            if (res == false)
             {
                 return BadRequest();
             }
-            return Ok(StudentRepository.students.Remove(stu));
+            return res;
         }
 
     }
