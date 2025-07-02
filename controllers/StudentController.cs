@@ -3,6 +3,9 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.Extensions.Logging;
+using CollegeManagementAPI.Data;
+using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 
 
@@ -17,24 +20,27 @@ namespace CollegeManagementAPI.Controllers
     {
         private readonly IStudentRepository _repo;
         private readonly ILogger<StudentController> _logger;
+        private readonly AppDbContext _context;
 
-        
 
-        public StudentController(IStudentRepository repo, ILogger<StudentController> logger)
+
+        public StudentController(IStudentRepository repo, ILogger<StudentController> logger, AppDbContext context)
         {
             _repo = repo;
             _logger = logger;
+            _context = context;
         }
         [HttpGet]
         [Route("GetStudents")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<IEnumerable<StudentDTO>> GetStudents()
+        public async Task<ActionResult<IEnumerable<StudentDTO>>> GetStudentsAsync()
         {
             _logger.LogInformation("The GetStudents method executed");
 
-            var stu = _repo.GetStudents().Select(s => new StudentDTO
+            var students = await _repo.GetStudentsAsync();
+            var stu=students.Select(s => new StudentDTO
            {
                 id = s.id,
                 name = s.name,
@@ -49,9 +55,9 @@ namespace CollegeManagementAPI.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<StudentDTO> GetById(int id)
+        public async Task<ActionResult<StudentDTO>> GetByIdAsync(int id)
         {
-            var stu = _repo.GetById(id);
+            var stu =  await _repo.GetByIdAsync(id);
             _logger.LogInformation("The GetById method executed");
             if (stu == null)
             {
@@ -71,7 +77,7 @@ namespace CollegeManagementAPI.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<StudentDTO> CreateStudent([FromBody] StudentDTO model)
+        public async Task<ActionResult<StudentDTO>> CreateStudentAsync([FromBody] StudentDTO model)
         {
             _logger.LogInformation("The CreateStudent method executed");
 
@@ -84,17 +90,17 @@ namespace CollegeManagementAPI.Controllers
                 name = model.name,
                 email=model.email
             };
-            var res = _repo.Create(student);
+            var res = await _repo.CreateAsync(student);
             model.id = res.id;
            
-            return Ok(res);
+            return Ok(model);
         }
         [HttpPut]
         [Route("update")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<StudentDTO> UpdateStudent([FromBody] StudentDTO model)
+        public async Task<ActionResult<StudentDTO>> UpdateStudentAsync([FromBody] StudentDTO model)
         {
             _logger.LogInformation("The UpdateStudent method executed");
 
@@ -103,7 +109,7 @@ namespace CollegeManagementAPI.Controllers
             name = model.name,
             email = model.email
             };
-            var res = _repo.Update(updated);
+            var res =await  _repo.UpdateAsync(updated);
             if (res == null)
             {
                 return BadRequest();
@@ -116,9 +122,9 @@ namespace CollegeManagementAPI.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<StudentDTO> UpdatePartial(int id, [FromBody] JsonPatchDocument<StudentDTO> patchDocument)
+        public async Task<ActionResult<StudentDTO>> UpdatePartialAsync(int id, [FromBody] JsonPatchDocument<StudentDTO> patchDocument)
         {
-            var existing = StudentRepository.students.FirstOrDefault(n => n.id == id);
+            var existing = await _context.Students.FirstOrDefaultAsync(n => n.id == id);
             if (existing == null)
             {
                 return BadRequest();
@@ -141,17 +147,16 @@ namespace CollegeManagementAPI.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<bool> DeleteStudent(int id)
+        public async Task<ActionResult<bool>> DeleteStudentAsync(int id)
         {
             _logger.LogInformation("The DeleteStudent method executed");
 
-            var res = _repo.DeleteStudent(id);
+            var res =await  _repo.DeleteStudentAsync(id);
             if (res == false)
             {
                 return BadRequest();
             }
             return res;
         }
-
     }
 }

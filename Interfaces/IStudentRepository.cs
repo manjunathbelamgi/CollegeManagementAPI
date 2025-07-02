@@ -1,11 +1,11 @@
 public interface IStudentRepository
 {
-    IEnumerable<Student> GetStudents();
-    Student GetById(int id);
+     Task<IEnumerable<Student>> GetStudentsAsync();
+     Task<Student> GetByIdAsync(int id);
 
-    Student Create(Student student);
+     Task<Student> CreateAsync(Student student);
 
-    Student Update(Student student);
+     Task<Student> UpdateAsync(Student student);
 
-    bool DeleteStudent(int id);
+     Task<bool> DeleteStudentAsync(int id);
 }

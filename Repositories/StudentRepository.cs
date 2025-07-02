@@ -1,30 +1,42 @@
+using CollegeManagementAPI.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.EntityFrameworkCore;
 
 public class StudentRepository: IStudentRepository
 {
-    public IEnumerable<Student> GetStudents()
+    private readonly AppDbContext _context;
+
+    public StudentRepository(AppDbContext context)
     {
-        return StudentRepository.students;
-        
+        _context = context;
+    }
+    public async Task<IEnumerable<Student>> GetStudentsAsync()
+    {
+        return await _context.Students.ToListAsync();
+
     }
 
-    public Student GetById(int id)
+    public async Task<Student> GetByIdAsync(int id)
     {
-        return StudentRepository.students.FirstOrDefault(n => n.id == id);
+        return await _context.Students.FirstOrDefaultAsync(n => n.id == id);
+
     }
 
-    public Student Create(Student student)
+    public async Task<Student> CreateAsync(Student student)
     {
-        var newId = StudentRepository.students.LastOrDefault().id + 1;
+        // var newId = _context.Students
+        //                     .OrderBy(s => s.id)
+        //                     .LastOrDefault();
 
-        student.id = newId;
-        StudentRepository.students.Add(student);
+       // student.id = newId;
+        await _context.Students.AddAsync(student);
+        await _context.SaveChangesAsync();
         return student;
     }
-    public Student Update(Student student)
+    public async Task<Student> UpdateAsync(Student student)
     {
-        var res = StudentRepository.students.FirstOrDefault(n => n.id == student.id);
+        var res = await _context.Students.FirstOrDefaultAsync(n => n.id == student.id);
         if (res == null)
         {
             return null;
@@ -32,37 +44,20 @@ public class StudentRepository: IStudentRepository
         res.id = student.id;
         res.name = student.name;
         res.email = student.email;
+        await _context.SaveChangesAsync();
         return res;
     }
 
-    public bool DeleteStudent(int id)
+    public async Task<bool> DeleteStudentAsync(int id)
     {
-        var vari = StudentRepository.students.FirstOrDefault(n => n.id == id);
+        var vari = await _context.Students.FirstOrDefaultAsync(n => n.id == id);
         if (vari == null)
         {
             return false;
         }
-        return StudentRepository.students.Remove(vari);
+        var res = _context.Students.Remove(vari);
+        await _context.SaveChangesAsync();
+        return true;
     }
-    public static List<Student> students { get; set; } = new List<Student>()
-    {
-        new Student
-        {
-            id=1,
-            name="manjunath",
-            email="manju@gmail.com"
-        },
-        new Student
-        {
-            id=2,
-            name="akash",
-            email="akash@gmail.com"
-         },
-         new Student{
-            id=3,
-            name="Abhishek",
-            email="abhi@gmail.com"
-         }
-
-    };
+    
 }
