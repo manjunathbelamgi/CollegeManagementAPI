@@ -172,3 +172,6 @@
 /workspaces/CollegeManagementAPI/CollegeManagementAPI/bin/Debug/net8.0/runtimes/win/lib/net6.0/System.Security.Cryptography.ProtectedData.dll
 /workspaces/CollegeManagementAPI/CollegeManagementAPI/bin/Debug/net8.0/runtimes/browser/lib/net8.0/System.Text.Encodings.Web.dll
 /workspaces/CollegeManagementAPI/CollegeManagementAPI/bin/Debug/net8.0/runtimes/win/lib/net6.0/System.Windows.Extensions.dll
+/workspaces/CollegeManagementAPI/CollegeManagementAPI/bin/Debug/net8.0/AutoMapper.dll
+/workspaces/CollegeManagementAPI/CollegeManagementAPI/bin/Debug/net8.0/AutoMapper.Extensions.Microsoft.DependencyInjection.dll
+/workspaces/CollegeManagementAPI/CollegeManagementAPI/bin/Debug/net8.0/Microsoft.AspNetCore.Authentication.JwtBearer.dll

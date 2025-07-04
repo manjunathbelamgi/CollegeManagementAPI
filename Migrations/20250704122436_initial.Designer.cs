@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CollegeManagementAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250701104615_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250704122436_initial")]
+    partial class initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -33,16 +33,37 @@ namespace CollegeManagementAPI.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
 
                     b.Property<string>("email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("id");
 
                     b.ToTable("Students");
+
+                    b.HasData(
+                        new
+                        {
+                            id = 1,
+                            email = "manju@gmail.com",
+                            name = "manju"
+                        },
+                        new
+                        {
+                            id = 2,
+                            email = "akash@gmail.com",
+                            name = "akash"
+                        },
+                        new
+                        {
+                            id = 3,
+                            email = "ram@gmail.com",
+                            name = "ram"
+                        });
                 });
 #pragma warning restore 612, 618
         }

@@ -6,6 +6,8 @@ using Microsoft.Extensions.Logging;
 using CollegeManagementAPI.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
+using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 
 
 
@@ -14,6 +16,7 @@ namespace CollegeManagementAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
 
     
     public class StudentController : ControllerBase
@@ -21,14 +24,16 @@ namespace CollegeManagementAPI.Controllers
         private readonly IStudentRepository _repo;
         private readonly ILogger<StudentController> _logger;
         private readonly AppDbContext _context;
+        private readonly IMapper _mapper;
 
 
 
-        public StudentController(IStudentRepository repo, ILogger<StudentController> logger, AppDbContext context)
+        public StudentController(IStudentRepository repo, ILogger<StudentController> logger, AppDbContext context, IMapper mapper)
         {
             _repo = repo;
             _logger = logger;
             _context = context;
+            _mapper = mapper;
         }
         [HttpGet]
         [Route("GetStudents")]
@@ -40,13 +45,13 @@ namespace CollegeManagementAPI.Controllers
             _logger.LogInformation("The GetStudents method executed");
 
             var students = await _repo.GetStudentsAsync();
-            var stu=students.Select(s => new StudentDTO
-           {
-                id = s.id,
-                name = s.name,
-                email = s.email
+            var stu = _mapper.Map<IEnumerable<StudentDTO>>(students);
+            //    {
+            //         id = s.id,
+            //         name = s.name,
+            //         email = s.email
 
-           });
+            //    });
             return Ok(stu);
         }
 
@@ -57,18 +62,18 @@ namespace CollegeManagementAPI.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<StudentDTO>> GetByIdAsync(int id)
         {
-            var stu =  await _repo.GetByIdAsync(id);
+            var stu = await _repo.GetByIdAsync(id);
             _logger.LogInformation("The GetById method executed");
             if (stu == null)
             {
                 return BadRequest();
             }
-            var stuDTO = new StudentDTO
-            {
-                id = stu.id,
-                name = stu.name,
-                email = stu.email
-            };
+            var stuDTO = _mapper.Map<StudentDTO>(stu);
+            // {
+            //     id = stu.id,
+            //     name = stu.name,
+            //     email = stu.email
+            // };
             return Ok(stuDTO);
         }
 
@@ -88,11 +93,11 @@ namespace CollegeManagementAPI.Controllers
             var student = new Student
             {
                 name = model.name,
-                email=model.email
+                email = model.email
             };
             var res = await _repo.CreateAsync(student);
             model.id = res.id;
-           
+
             return Ok(model);
         }
         [HttpPut]
@@ -104,12 +109,12 @@ namespace CollegeManagementAPI.Controllers
         {
             _logger.LogInformation("The UpdateStudent method executed");
 
-            var updated = new Student { 
-            id = model.id,
-            name = model.name,
-            email = model.email
-            };
-            var res =await  _repo.UpdateAsync(updated);
+            var updated = _mapper.Map<Student>(model);
+            // id = model.id,
+            // name = model.name,
+            // email = model.email
+            // };
+            var res = await _repo.UpdateAsync(updated);
             if (res == null)
             {
                 return BadRequest();
@@ -129,12 +134,12 @@ namespace CollegeManagementAPI.Controllers
             {
                 return BadRequest();
             }
-            var stuDTO = new StudentDTO
-            {
-                id = existing.id,
-                name = existing.name,
-                email = existing.email
-            };
+            var stuDTO = _mapper.Map<StudentDTO>(existing);
+            // {
+            //     id = existing.id,
+            //     name = existing.name,
+            //     email = existing.email
+            // };
             patchDocument.ApplyTo(stuDTO);
             existing.id = stuDTO.id;
             existing.name = stuDTO.name;
@@ -151,7 +156,7 @@ namespace CollegeManagementAPI.Controllers
         {
             _logger.LogInformation("The DeleteStudent method executed");
 
-            var res =await  _repo.DeleteStudentAsync(id);
+            var res = await _repo.DeleteStudentAsync(id);
             if (res == false)
             {
                 return BadRequest();
